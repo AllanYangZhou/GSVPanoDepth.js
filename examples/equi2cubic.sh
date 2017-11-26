@@ -8,9 +8,21 @@
 # Where input_images is the folder with the panoramas.
 
 
-for file in $(ls $1); do
-    echo "[*] Processing: $1/$file"
-    erect2cubic --erect=$1/$file --ptofile=${file::-4}.pto
-    nona -o ${file::-4}_cube ${file::-4}.pto
-    rm ${file::-4}.pto
+for file in $1/*; do
+    echo "[*] Processing: $file"
+    filename=$(basename "$file")
+    echo "$filename"
+    erect2cubic --erect=$1/$file --ptofile=${filename::-4}.pto
+    nona -o ${filename::-4}_cube ${filename::-4}.pto
+    rm ${filename::-4}.pto
 done
+
+# Only care about forward and backwards cube faces
+rm ./*0001.tif
+rm ./*0003.tif
+rm ./*0004.tif
+rm ./*0005.tif
+
+# Convert to jpg
+for i in *.tif ; do convert "$i" "${i%.*}.jpg" ; done
+rm *.tif

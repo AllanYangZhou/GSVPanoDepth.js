@@ -3,7 +3,7 @@
 declare -A arr
 shopt -s globstar
 
-for file in **; do
+for file in $1/**; do
   [[ -f "$file" ]] || continue
 
   read cksm _ < <(md5sum "$file")
