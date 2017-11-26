@@ -12,13 +12,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('in_folder', type=str)
     parser.add_argument('out_folder', type=str)
+    parser.add_argument('--start', type=int, default=0)
     args = parser.parse_args()
-    os.makedirs(args.out_folder)
+    if not os.path.exists(args.out_folder):
+        os.makedirs(args.out_folder)
     depth_paths = glob.glob(os.path.join(args.in_folder, 'depth*'))
+    depth_paths = sorted(depth_paths, key=lambda x: int(os.path.basename(x).split('.')[0][5:]))
     num_pairs = len(depth_paths)
     display = None
     for depth_path in depth_paths:
         number = int(os.path.basename(depth_path).split('.')[0][5:])
+        if number < args.start: # Skip images if they are before the specified start number
+            continue
         pano_path = os.path.join(args.in_folder, 'pano{:d}.png'.format(number))
         if not os.path.exists(pano_path):
             print('Missing corresponding panorama for depth map {:d}, skipping!'.format(number))
@@ -35,12 +40,12 @@ if __name__ == '__main__':
         else:
             display.set_data(combined_image)
             plt.draw()
-        response = raw_input('Press [Enter] or "y" to accept, type "n" to reject.')
+        response = raw_input('Pair {:d}: Press [Enter] or "y" to accept, type "n" to reject.'.format(number))
         if response == '' or response == 'y':
-            print('Accepting')
+            print('Accepted.')
             out_depth_path = os.path.join(args.out_folder, 'depth{:d}.png'.format(number))
             out_pano_path = os.path.join(args.out_folder, 'pano{:d}.png'.format(number))
             copyfile(depth_path, out_depth_path)
             copyfile(pano_path, out_pano_path)
         else:
-            print('Rejecting')
+            print('Rejected.')

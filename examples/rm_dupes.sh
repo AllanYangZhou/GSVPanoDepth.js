@@ -1,4 +1,5 @@
 #!/bin/bash
+# https://superuser.com/a/386209
 declare -A arr
 shopt -s globstar
 
