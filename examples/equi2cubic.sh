@@ -23,6 +23,7 @@ rm ./*0003.tif
 rm ./*0004.tif
 rm ./*0005.tif
 
-# Convert to jpg
-for i in *.tif ; do convert "$i" "${i%.*}.jpg" ; done
+# Convert to jpg and resize
+mogrify -format jpg -resize 264x264 -quality 100 depth*.tif
+mogrify -format jpg -quality 100 pano*.tif
 rm *.tif
