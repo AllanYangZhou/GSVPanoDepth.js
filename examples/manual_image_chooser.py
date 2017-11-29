@@ -17,18 +17,22 @@ if __name__ == '__main__':
     if not os.path.exists(args.out_folder):
         os.makedirs(args.out_folder)
     depth_paths = glob.glob(os.path.join(args.in_folder, 'depth*'))
-    depth_paths = sorted(depth_paths, key=lambda x: int(os.path.basename(x).split('.')[0][5:]))
+    depth_paths = sorted(depth_paths)
     num_pairs = len(depth_paths)
     display = None
-    for depth_path in depth_paths:
-        number = int(os.path.basename(depth_path).split('.')[0][5:])
-        if number < args.start: # Skip images if they are before the specified start number
+    for i, depth_path in enumerate(depth_paths):
+        base, ext = os.path.splitext(os.path.basename(depth_path))
+        postfix = base[5:]
+        if i < args.start: # Skip images if they are before the specified start number
             continue
-        pano_path = os.path.join(args.in_folder, 'pano{:d}.png'.format(number))
+        pano_path = os.path.join(args.in_folder, 'pano{:s}{:s}'.format(postfix, ext))
         if not os.path.exists(pano_path):
-            print('Missing corresponding panorama for depth map {:d}, skipping!'.format(number))
+            print(pano_path)
+            print('Missing corresponding panorama for depth map {:d}, skipping!'.format(i))
             continue
         depth_image = imread(depth_path)
+        if depth_image.ndim < 3:
+            depth_image = np.stack(3 * [depth_image], axis=2)
         h, w, _ = depth_image.shape
         pano_image = imread(pano_path)
         pano_image = 255 * resize(pano_image, (h,w))
@@ -40,11 +44,11 @@ if __name__ == '__main__':
         else:
             display.set_data(combined_image)
             plt.draw()
-        response = raw_input('Pair {:d}: Press [Enter] or "y" to accept, type "n" to reject.'.format(number))
+        response = raw_input('Pair {:d}: Press [Enter] or "y" to accept, type "n" to reject.'.format(i))
         if response == '' or response == 'y':
             print('Accepted.')
-            out_depth_path = os.path.join(args.out_folder, 'depth{:d}.png'.format(number))
-            out_pano_path = os.path.join(args.out_folder, 'pano{:d}.png'.format(number))
+            out_depth_path = os.path.join(args.out_folder, 'depth{:s}{:s}'.format(postfix, ext))
+            out_pano_path = os.path.join(args.out_folder, 'pano{:s}{:s}'.format(postfix, ext))
             copyfile(depth_path, out_depth_path)
             copyfile(pano_path, out_pano_path)
         else:

@@ -8,7 +8,7 @@
 # Where input_images is the folder with the panoramas.
 
 
-for file in $1/*; do
+for file in $1/*.png; do
     echo "[*] Processing: $file"
     filename=$(basename "$file")
     echo "$filename"
